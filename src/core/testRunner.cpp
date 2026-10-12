@@ -2,6 +2,7 @@
 
 #include <QElapsedTimer>
 
+#include "hardware/zniConnection.h"
 #include "testContext.h"
 
 TestRunner::TestRunner(QObject *parent)
@@ -31,12 +32,21 @@ void TestRunner::abort()
 
 void TestRunner::run()
 {
-    if (m_context == nullptr) {
-        emit runFinished();
+    if (m_context == nullptr || m_context->connection() == nullptr) {
+        m_tests.clear();
+        emit runFailed(QStringLiteral("Keine Verbindung konfiguriert"));
         return;
     }
 
     m_context->setAbortRequested(false);
+
+    // Die Verbindung wird hier geöffnet, damit ihr Socket dem Thread des Runners gehört
+    ZniConnection *connection = m_context->connection();
+    if (!connection->open()) {
+        m_tests.clear();
+        emit runFailed(connection->errorString());
+        return;
+    }
 
     for (const std::unique_ptr<TestCase> &test : m_tests) {
         if (m_context->abortRequested()) {
@@ -53,6 +63,7 @@ void TestRunner::run()
         emit testFinished(result);
     }
 
+    connection->close();
     m_tests.clear();
     emit runFinished();
 }

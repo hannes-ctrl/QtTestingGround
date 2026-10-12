@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets)
+find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Network)
 
 set(PROJECT_SOURCES
         src/main.cpp
@@ -36,19 +36,18 @@ set(PROJECT_SOURCES
         src/tests/switchCardsTest.cpp
         src/tests/switchCardsTest.h
 
-        src/hardware/hardwareInterface.h
-        src/hardware/zlvBusInterface.h
-        src/hardware/ttyInterface.h
-        src/hardware/switchCardInterface.h
-        src/hardware/simulatedZlvBus.cpp
-        src/hardware/simulatedZlvBus.h
-        src/hardware/simulatedTty.cpp
-        src/hardware/simulatedTty.h
-        src/hardware/simulatedSwitchCard.cpp
-        src/hardware/simulatedSwitchCard.h
+        src/hardware/telegram.cpp
+        src/hardware/telegram.h
+        src/hardware/zniConnection.h
+        src/hardware/tcpZniConnection.cpp
+        src/hardware/tcpZniConnection.h
+        src/hardware/simulatedZniConnection.cpp
+        src/hardware/simulatedZniConnection.h
 
-        src/report/reportWriter.cpp
-        src/report/reportWriter.h
+        src/report/jsonReportWriter.cpp
+        src/report/jsonReportWriter.h
+        src/report/pdfReportGenerator.cpp
+        src/report/pdfReportGenerator.h
 
         src/config/config.cpp
         src/config/config.h
@@ -61,10 +60,13 @@ add_executable(ZNI-BG_Testing ${PROJECT_SOURCES})
 
 target_include_directories(ZNI-BG_Testing PRIVATE src)
 
+target_compile_definitions(ZNI-BG_Testing PRIVATE APP_VERSION="${PROJECT_VERSION}")
+
 target_link_libraries(ZNI-BG_Testing PRIVATE
         Qt5::Core
         Qt5::Gui
         Qt5::Widgets
+        Qt5::Network
 )
 
 set_target_properties(ZNI-BG_Testing PROPERTIES

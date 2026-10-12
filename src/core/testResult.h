@@ -17,6 +17,11 @@ enum class TestStatus {
 };
 
 /**
+ * @brief Maschinenlesbarer Name eines Status, wie er im JSON-Protokoll steht (z. B. "passed").
+ */
+QString testStatusToString(TestStatus status);
+
+/**
  * @brief Ergebnis eines einzelnen Prüfschritts innerhalb eines Tests.
  */
 class StepResult {
@@ -29,10 +34,23 @@ public:
     TestStatus status() const;
     QString message() const;
 
+    /**
+     * @brief Gesendetes, empfangenes und erwartetes Telegramm als Hex-Text (leer, wenn nicht zutreffend).
+     */
+    QString sent() const;
+    void setSent(const QString &sent);
+    QString received() const;
+    void setReceived(const QString &received);
+    QString expected() const;
+    void setExpected(const QString &expected);
+
 private:
     QString m_name;
     TestStatus m_status;
     QString m_message;
+    QString m_sent;
+    QString m_received;
+    QString m_expected;
 };
 
 /**

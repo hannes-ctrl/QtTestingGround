@@ -1,5 +1,22 @@
 #include "testResult.h"
 
+QString testStatusToString(const TestStatus status)
+{
+    switch (status) {
+    case TestStatus::NotRun:
+        return QStringLiteral("notRun");
+    case TestStatus::Passed:
+        return QStringLiteral("passed");
+    case TestStatus::Failed:
+        return QStringLiteral("failed");
+    case TestStatus::Skipped:
+        return QStringLiteral("skipped");
+    case TestStatus::Error:
+        return QStringLiteral("error");
+    }
+    return QString();
+}
+
 StepResult::StepResult()
     : m_status(TestStatus::NotRun)
 {
@@ -27,6 +44,36 @@ TestStatus StepResult::status() const
 QString StepResult::message() const
 {
     return m_message;
+}
+
+QString StepResult::sent() const
+{
+    return m_sent;
+}
+
+void StepResult::setSent(const QString &sent)
+{
+    m_sent = sent;
+}
+
+QString StepResult::received() const
+{
+    return m_received;
+}
+
+void StepResult::setReceived(const QString &received)
+{
+    m_received = received;
+}
+
+QString StepResult::expected() const
+{
+    return m_expected;
+}
+
+void StepResult::setExpected(const QString &expected)
+{
+    m_expected = expected;
 }
 
 TestResult::TestResult()

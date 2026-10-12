@@ -39,6 +39,12 @@ class TestRunner : public QObject
         void testFinished(const TestResult &result);
         void runFinished();
 
+        /**
+         * @brief Der Durchlauf konnte nicht gestartet werden (z. B. keine Verbindung zum Sim-ZNI).
+         *        runFinished() wird in diesem Fall nicht gesendet.
+         */
+        void runFailed(const QString &message);
+
     private:
         std::vector<std::unique_ptr<TestCase>> m_tests;
         TestContext *m_context;

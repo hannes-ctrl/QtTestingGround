@@ -1,10 +1,7 @@
 #include "testContext.h"
 
-TestContext::TestContext(ZlvBusInterface *zlvBus, TtyInterface *tty, SwitchCardInterface *switchCard,
-                         Config *config, Logger *logger)
-    : m_zlvBus(zlvBus)
-    , m_tty(tty)
-    , m_switchCard(switchCard)
+TestContext::TestContext(ZniConnection *connection, Config *config, Logger *logger)
+    : m_connection(connection)
     , m_config(config)
     , m_logger(logger)
     , m_abortRequested(false)
@@ -13,19 +10,9 @@ TestContext::TestContext(ZlvBusInterface *zlvBus, TtyInterface *tty, SwitchCardI
 
 TestContext::~TestContext() = default;
 
-ZlvBusInterface *TestContext::zlvBus() const
+ZniConnection *TestContext::connection() const
 {
-    return m_zlvBus;
-}
-
-TtyInterface *TestContext::tty() const
-{
-    return m_tty;
-}
-
-SwitchCardInterface *TestContext::switchCard() const
-{
-    return m_switchCard;
+    return m_connection;
 }
 
 Config *TestContext::config() const

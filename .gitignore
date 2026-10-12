@@ -1,0 +1,11 @@
+# Build-Ausgaben
+build/
+cmake-build-*/
+
+# IDE-Einstellungen
+.idea/
+.qtcreator/
+CMakeLists.txt.user*
+
+# Rechnerspezifische Pfade
+env.ps1

@@ -21,9 +21,7 @@ class TestCase;
 class TestContext;
 class TestRunner;
 class TestSession;
-class ZlvBusInterface;
-class TtyInterface;
-class SwitchCardInterface;
+class ZniConnection;
 
 /**
  * @brief Hauptfenster: Eingabemaske, Start der Tests und Anzeige der Ergebnisse.
@@ -41,6 +39,7 @@ class MainWindow : public QMainWindow
         void onTestStarted(const QString &testName);
         void onTestFinished(const TestResult &result);
         void onRunFinished();
+        void onRunFailed(const QString &message);
 
     private:
         /**
@@ -48,14 +47,16 @@ class MainWindow : public QMainWindow
          */
         std::vector<std::unique_ptr<TestCase>> createSelectedTests() const;
 
+        /**
+         * @brief Schreibt das JSON-Protokoll des Durchlaufs und erzeugt daraus das PDF.
+         */
+        void writeReports();
+
         Ui::MainWindow *ui;
 
         std::unique_ptr<Config> m_config;
         std::unique_ptr<Logger> m_logger;
-
-        std::unique_ptr<ZlvBusInterface> m_zlvBus;
-        std::unique_ptr<TtyInterface> m_tty;
-        std::unique_ptr<SwitchCardInterface> m_switchCard;
+        std::unique_ptr<ZniConnection> m_connection;
 
         std::unique_ptr<TestContext> m_context;
         std::unique_ptr<TestSession> m_session;

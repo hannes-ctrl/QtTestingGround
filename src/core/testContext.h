@@ -7,22 +7,17 @@
 
 class Config;
 class Logger;
-class ZlvBusInterface;
-class TtyInterface;
-class SwitchCardInterface;
+class ZniConnection;
 
 /**
  * @brief Bündelt alles, was ein Test zur Ausführung braucht. Besitzt die Objekte nicht.
  */
 class TestContext {
 public:
-    TestContext(ZlvBusInterface *zlvBus, TtyInterface *tty, SwitchCardInterface *switchCard,
-                Config *config, Logger *logger);
+    TestContext(ZniConnection *connection, Config *config, Logger *logger);
     ~TestContext();
 
-    ZlvBusInterface *zlvBus() const;
-    TtyInterface *tty() const;
-    SwitchCardInterface *switchCard() const;
+    ZniConnection *connection() const;
     Config *config() const;
     Logger *logger() const;
 
@@ -33,9 +28,7 @@ public:
     void setAbortRequested(bool abortRequested);
 
 private:
-    ZlvBusInterface *m_zlvBus;
-    TtyInterface *m_tty;
-    SwitchCardInterface *m_switchCard;
+    ZniConnection *m_connection;
     Config *m_config;
     Logger *m_logger;
 
