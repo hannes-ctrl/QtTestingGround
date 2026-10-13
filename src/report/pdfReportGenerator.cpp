@@ -28,6 +28,9 @@ QString statusText(const QString &status)
     if (status == QLatin1String("error")) {
         return QStringLiteral("Fehler");
     }
+    if (status == QLatin1String("notEvaluated")) {
+        return QStringLiteral("nicht bewertet");
+    }
     return QStringLiteral("nicht ausgeführt");
 }
 
@@ -38,6 +41,9 @@ QString statusColor(const QString &status)
     }
     if (status == QLatin1String("failed") || status == QLatin1String("error")) {
         return QStringLiteral("#b3261e");
+    }
+    if (status == QLatin1String("notEvaluated")) {
+        return QStringLiteral("#a15c00");
     }
     return QStringLiteral("#555555");
 }

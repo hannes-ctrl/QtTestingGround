@@ -1,5 +1,6 @@
 {
     "host": "10.90.78.33",
+    "testZniHost": "10.90.78.32",
     "port": 2000,
     "timeoutMs": 3000,
     "simulation": false,

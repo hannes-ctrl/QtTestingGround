@@ -19,8 +19,8 @@
      <rect>
       <x>170</x>
       <y>130</y>
-      <width>231</width>
-      <height>141</height>
+      <width>331</width>
+      <height>251</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -33,10 +33,44 @@
          </property>
         </widget>
        </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="ipSimZniInput">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="placeholderText">
+          <string>10.90.78.33</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="ipSimZniLabel">
+         <property name="text">
+          <string> IP-Adresse Sim-ZNI</string>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="0">
         <widget class="QLabel" name="serialNumberLabel">
          <property name="text">
           <string>Seriennummer</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="ipTestZniInput">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="placeholderText">
+          <string>10.90.78.32</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="ipTestZniLabel">
+         <property name="text">
+          <string> IP-Adresse Test-ZNI</string>
          </property>
         </widget>
        </item>
@@ -73,6 +107,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="miscCheckBox">
+       <property name="text">
+        <string>Sonstige Tests (Status, Reset)</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="button">
        <property name="text">
         <string>Tests starten</string>
@@ -86,9 +130,12 @@
  </widget>
  <tabstops>
   <tabstop>serialNumberInput</tabstop>
+  <tabstop>ipSimZniInput</tabstop>
+  <tabstop>ipTestZniInput</tabstop>
   <tabstop>zlvCheckBox</tabstop>
   <tabstop>ttyCheckBox</tabstop>
   <tabstop>switchCardsCheckBox</tabstop>
+  <tabstop>miscCheckBox</tabstop>
   <tabstop>button</tabstop>
  </tabstops>
  <resources/>

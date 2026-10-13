@@ -15,6 +15,11 @@ ZniConnection *TestContext::connection() const
     return m_connection;
 }
 
+void TestContext::setConnection(ZniConnection *connection)
+{
+    m_connection = connection;
+}
+
 Config *TestContext::config() const
 {
     return m_config;
@@ -33,6 +38,16 @@ QString TestContext::serialNumber() const
 void TestContext::setSerialNumber(const QString &serialNumber)
 {
     m_serialNumber = serialNumber;
+}
+
+QString TestContext::testZniHost() const
+{
+    return m_testZniHost;
+}
+
+void TestContext::setTestZniHost(const QString &testZniHost)
+{
+    m_testZniHost = testZniHost;
 }
 
 bool TestContext::abortRequested() const

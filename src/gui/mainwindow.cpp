@@ -3,6 +3,8 @@
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QHostAddress>
+#include <QLineEdit>
 
 #include "config/config.h"
 #include "core/testCase.h"
@@ -13,6 +15,8 @@
 #include "hardware/tcpZniConnection.h"
 #include "report/jsonReportWriter.h"
 #include "report/pdfReportGenerator.h"
+#include "tests/initialTest.h"
+#include "tests/miscTest.h"
 #include "tests/switchCardsTest.h"
 #include "tests/ttyTest.h"
 #include "tests/zlvTest.h"
@@ -23,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
     , m_config(std::make_unique<Config>())
     , m_logger(std::make_unique<Logger>())
+    , m_context(std::make_unique<TestContext>(nullptr, m_config.get(), m_logger.get()))
     , m_runner(new TestRunner)
 {
     ui->setupUi(this);
@@ -30,12 +35,9 @@ MainWindow::MainWindow(QWidget *parent)
     // Ohne config.json neben der Anwendung gelten die Standardwerte
     m_config->load(QCoreApplication::applicationDirPath() + QStringLiteral("/config.json"));
 
-    if (m_config->simulation()) {
-        m_connection = std::make_unique<SimulatedZniConnection>();
-    } else {
-        m_connection = std::make_unique<TcpZniConnection>(m_config->host(), m_config->port(), m_config->timeoutMs());
-    }
-    m_context = std::make_unique<TestContext>(m_connection.get(), m_config.get(), m_logger.get());
+    // Die Platzhalter zeigen die Adressen, die bei leerem Eingabefeld verwendet werden
+    ui->ipSimZniInput->setPlaceholderText(m_config->host());
+    ui->ipTestZniInput->setPlaceholderText(m_config->testZniHost());
 
     qRegisterMetaType<TestResult>("TestResult");
 
@@ -58,10 +60,26 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_button_clicked()
 {
+    QString simZniHost;
+    QString testZniHost;
+    if (!readHost(ui->ipSimZniInput, QStringLiteral("Sim-ZNI"), simZniHost)
+        || !readHost(ui->ipTestZniInput, QStringLiteral("Test-ZNI"), testZniHost)) {
+        return;
+    }
+
     ui->button->setEnabled(false);
 
+    // Die Verbindung wird für jeden Durchlauf neu angelegt, weil sich die Adresse geändert haben kann
+    if (m_config->simulation()) {
+        m_connection = std::make_unique<SimulatedZniConnection>();
+    } else {
+        m_connection = std::make_unique<TcpZniConnection>(simZniHost, m_config->port(), m_config->timeoutMs());
+    }
+
     m_session = std::make_unique<TestSession>(ui->serialNumberInput->text());
+    m_context->setConnection(m_connection.get());
     m_context->setSerialNumber(m_session->serialNumber());
+    m_context->setTestZniHost(testZniHost);
 
     m_runner->setTests(createSelectedTests());
     m_runner->setContext(m_context.get());
@@ -91,9 +109,26 @@ void MainWindow::onRunFailed(const QString &message)
     ui->button->setEnabled(true);
 }
 
+bool MainWindow::readHost(const QLineEdit *input, const QString &label, QString &host)
+{
+    host = input->text().trimmed();
+    if (host.isEmpty()) {
+        host = input->placeholderText();
+    }
+
+    if (QHostAddress(host).isNull()) {
+        ui->statusbar->showMessage(QStringLiteral("IP-Adresse %1 ist ungültig: %2").arg(label, host));
+        return false;
+    }
+    return true;
+}
+
 std::vector<std::unique_ptr<TestCase>> MainWindow::createSelectedTests() const
 {
     std::vector<std::unique_ptr<TestCase>> tests;
+
+    // Die ersten Tests laufen immer und vor allen anderen
+    tests.push_back(std::make_unique<InitialTest>());
 
     if (ui->zlvCheckBox->isChecked()) {
         tests.push_back(std::make_unique<ZlvTest>());
@@ -103,6 +138,10 @@ std::vector<std::unique_ptr<TestCase>> MainWindow::createSelectedTests() const
     }
     if (ui->switchCardsCheckBox->isChecked()) {
         tests.push_back(std::make_unique<SwitchCardsTest>());
+    }
+    // Muss der letzte Test bleiben, weil er mit dem Reset endet
+    if (ui->miscCheckBox->isChecked()) {
+        tests.push_back(std::make_unique<MiscTest>());
     }
 
     return tests;

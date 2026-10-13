@@ -16,6 +16,7 @@ namespace Ui {
 QT_END_NAMESPACE
 
 class Config;
+class QLineEdit;
 class Logger;
 class TestCase;
 class TestContext;
@@ -46,6 +47,12 @@ class MainWindow : public QMainWindow
          * @brief Erstellt die Liste der Tests anhand der gesetzten Checkboxen.
          */
         std::vector<std::unique_ptr<TestCase>> createSelectedTests() const;
+
+        /**
+         * @brief Liest eine IP-Adresse aus einem Eingabefeld; ist es leer, gilt der Platzhalter.
+         * @return false bei ungültiger Adresse (Meldung in der Statusleiste)
+         */
+        bool readHost(const QLineEdit *input, const QString &label, QString &host);
 
         /**
          * @brief Schreibt das JSON-Protokoll des Durchlaufs und erzeugt daraus das PDF.

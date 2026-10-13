@@ -4,7 +4,7 @@
 #include "core/testCase.h"
 
 /**
- * @brief Tests der Anschaltkarten.
+ * @brief Tests der Anschaltkarten (Testspezifikation Kapitel 5).
  */
 class SwitchCardsTest : public TestCase {
 public:

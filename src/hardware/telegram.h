@@ -11,7 +11,7 @@
  */
 class Telegram {
 public:
-    static const int Size = 40;
+    static constexpr int Size = 40;
 
     /**
      * @brief Erzeugt ein Telegramm aus 40 Nullbytes.

@@ -5,6 +5,7 @@
 
 #include "testResult.h"
 
+class Telegram;
 class TestContext;
 
 /**
@@ -25,6 +26,22 @@ public:
 
 protected:
     explicit TestCase(const QString &name);
+
+    /**
+     * @brief Sendet ein Telegramm und macht daraus einen Prüfschritt mit gesendetem und empfangenem Telegramm.
+     *
+     * Kommt keine Antwort, hat der Schritt den Status Error. Sonst ist er NotEvaluated,
+     * solange die Auswertung der Antwort nicht festgelegt ist.
+     *
+     * @param response erhält die Antwort, falls angegeben und eine empfangen wurde
+     */
+    StepResult sendStep(TestContext &context, const QString &stepName, const Telegram &request,
+                        Telegram *response = nullptr) const;
+
+    /**
+     * @brief Prüfschritt, der laut Testspezifikation (noch) nicht ausgeführt werden kann.
+     */
+    static StepResult skippedStep(const QString &stepName, const QString &reason);
 
 private:
     QString m_name;

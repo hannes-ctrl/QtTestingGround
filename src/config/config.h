@@ -15,11 +15,19 @@ public:
 
     /**
      * @brief Lädt die Einstellungen aus einer JSON-Datei. Fehlende Einträge behalten ihren Standardwert.
-     * @return true bei Erfolg, false wenn die Datei fehlt oder kein gültiges JSON enthält
+     * @return true bei Erfolg, false, wenn die Datei fehlt oder kein gültiges JSON enthält
      */
     bool load(const QString &filePath);
 
+    /**
+     * @brief IP-Adresse des Sim-ZNI, mit dem sich der Test-PC verbindet.
+     */
     QString host() const;
+
+    /**
+     * @brief IP-Adresse des zu testenden ZNI.
+     */
+    QString testZniHost() const;
     quint16 port() const;
     int timeoutMs() const;
 
@@ -32,6 +40,7 @@ public:
 
 private:
     QString m_host;
+    QString m_testZniHost;
     quint16 m_port;
     int m_timeoutMs;
     bool m_simulation;

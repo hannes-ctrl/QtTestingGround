@@ -7,6 +7,7 @@
 
 Config::Config()
     : m_host(QStringLiteral("10.90.78.33"))
+    , m_testZniHost(QStringLiteral("10.90.78.32"))
     , m_port(2000)
     , m_timeoutMs(3000)
     , m_simulation(false)
@@ -30,6 +31,7 @@ bool Config::load(const QString &filePath)
 
     const QJsonObject root = document.object();
     m_host = root.value(QStringLiteral("host")).toString(m_host);
+    m_testZniHost = root.value(QStringLiteral("testZniHost")).toString(m_testZniHost);
     m_port = static_cast<quint16>(root.value(QStringLiteral("port")).toInt(m_port));
     m_timeoutMs = root.value(QStringLiteral("timeoutMs")).toInt(m_timeoutMs);
     m_simulation = root.value(QStringLiteral("simulation")).toBool(m_simulation);
@@ -40,6 +42,11 @@ bool Config::load(const QString &filePath)
 QString Config::host() const
 {
     return m_host;
+}
+
+QString Config::testZniHost() const
+{
+    return m_testZniHost;
 }
 
 quint16 Config::port() const

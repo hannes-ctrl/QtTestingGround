@@ -13,13 +13,23 @@ enum class TestStatus {
     Passed,
     Failed,
     Skipped,
-    Error
+    Error,
+    /// Ausgeführt und Antwort erhalten, aber noch ohne Soll-Ist-Vergleich
+    NotEvaluated
 };
 
 /**
  * @brief Maschinenlesbarer Name eines Status, wie er im JSON-Protokoll steht (z. B. "passed").
  */
 QString testStatusToString(TestStatus status);
+
+/**
+ * @brief Fasst mehrere Status zu einem Gesamtstatus zusammen.
+ *
+ * Es gewinnt der schwerwiegendste: Error, dann Failed, dann NotEvaluated, dann Passed.
+ * Skipped und NotRun zählen nur, wenn nichts anderes vorliegt.
+ */
+TestStatus combineTestStatus(const QVector<TestStatus> &statuses);
 
 /**
  * @brief Ergebnis eines einzelnen Prüfschritts innerhalb eines Tests.

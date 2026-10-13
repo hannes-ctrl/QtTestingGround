@@ -13,8 +13,29 @@ QString testStatusToString(const TestStatus status)
         return QStringLiteral("skipped");
     case TestStatus::Error:
         return QStringLiteral("error");
+    case TestStatus::NotEvaluated:
+        return QStringLiteral("notEvaluated");
     }
     return QString();
+}
+
+TestStatus combineTestStatus(const QVector<TestStatus> &statuses)
+{
+    // Aufsteigend nach Gewicht; der Status mit dem höchsten Gewicht bestimmt das Ergebnis
+    static const QVector<TestStatus> order = {
+        TestStatus::NotRun,
+        TestStatus::Skipped,
+        TestStatus::Passed,
+        TestStatus::NotEvaluated,
+        TestStatus::Failed,
+        TestStatus::Error
+    };
+
+    int highest = 0;
+    for (const TestStatus status : statuses) {
+        highest = qMax(highest, order.indexOf(status));
+    }
+    return order.at(highest);
 }
 
 StepResult::StepResult()
@@ -106,20 +127,11 @@ QVector<StepResult> TestResult::steps() const
 
 TestStatus TestResult::status() const
 {
-    if (m_steps.isEmpty()) {
-        return TestStatus::NotRun;
-    }
-
-    TestStatus overall = TestStatus::Passed;
+    QVector<TestStatus> statuses;
     for (const StepResult &step : m_steps) {
-        if (step.status() == TestStatus::Error) {
-            return TestStatus::Error;
-        }
-        if (step.status() == TestStatus::Failed) {
-            overall = TestStatus::Failed;
-        }
+        statuses.append(step.status());
     }
-    return overall;
+    return combineTestStatus(statuses);
 }
 
 qint64 TestResult::durationMs() const

@@ -29,15 +29,23 @@ set(PROJECT_SOURCES
         src/core/testRunner.cpp
         src/core/testRunner.h
 
+        src/tests/initialTest.cpp
+        src/tests/initialTest.h
         src/tests/zlvTest.cpp
         src/tests/zlvTest.h
         src/tests/ttyTest.cpp
         src/tests/ttyTest.h
         src/tests/switchCardsTest.cpp
         src/tests/switchCardsTest.h
+        src/tests/miscTest.cpp
+        src/tests/miscTest.h
 
         src/hardware/telegram.cpp
         src/hardware/telegram.h
+        src/hardware/telegramBuilder.cpp
+        src/hardware/telegramBuilder.h
+        src/hardware/zniErrorCode.cpp
+        src/hardware/zniErrorCode.h
         src/hardware/zniConnection.h
         src/hardware/tcpZniConnection.cpp
         src/hardware/tcpZniConnection.h

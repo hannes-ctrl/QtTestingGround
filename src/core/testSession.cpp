@@ -40,18 +40,9 @@ QVector<TestResult> TestSession::results() const
 
 TestStatus TestSession::status() const
 {
-    if (m_results.isEmpty()) {
-        return TestStatus::NotRun;
-    }
-
-    TestStatus overall = TestStatus::Passed;
+    QVector<TestStatus> statuses;
     for (const TestResult &result : m_results) {
-        if (result.status() == TestStatus::Error) {
-            return TestStatus::Error;
-        }
-        if (result.status() != TestStatus::Passed) {
-            overall = TestStatus::Failed;
-        }
+        statuses.append(result.status());
     }
-    return overall;
+    return combineTestStatus(statuses);
 }
