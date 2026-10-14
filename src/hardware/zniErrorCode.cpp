@@ -7,6 +7,7 @@ namespace {
 const QHash<quint8, QString> &descriptions()
 {
     static const QHash<quint8, QString> table = {
+        {0x00, QStringLiteral("OK")},
         {0x01, QStringLiteral("Zustände der Anschaltkarten anfordern: Keine Anschaltkarte ausgewählt")},
         {0x02, QStringLiteral("Zustände der Anschaltkarten anfordern: Ungültige Zykluszeit")},
         {0x03, QStringLiteral("Zustände der Anschaltkarten anfordern: Maskenkonflikt zwischen anfordern und setzen (Steckplatz doppelt ausgewählt)")},

@@ -1,6 +1,14 @@
 #include "tcpZniConnection.h"
 
+#include <QDeadlineTimer>
 #include <QTcpSocket>
+
+namespace {
+
+/// Obergrenze für zwischengespeicherte Telegramme, z. B. bei zyklischen Statusmeldungen
+const int MaxPendingTelegrams = 200;
+
+}
 
 TcpZniConnection::TcpZniConnection(const QString &host, const quint16 port, const int timeoutMs)
     : m_host(host)
@@ -33,6 +41,9 @@ bool TcpZniConnection::open()
 
 void TcpZniConnection::close()
 {
+    m_buffer.clear();
+    m_pending.clear();
+
     if (m_socket == nullptr) {
         return;
     }
@@ -57,8 +68,11 @@ bool TcpZniConnection::send(const Telegram &request, Telegram &response)
         return false;
     }
 
-    // Reste einer früheren Antwort verwerfen
-    m_socket->readAll();
+    // Ältere Telegramme mit demselben Kommando (z. B. zyklische Meldungen) sind keine Antwort auf diese Anfrage
+    readAvailable();
+    Telegram stale;
+    while (takePending(request.command(), stale)) {
+    }
 
     m_socket->write(request.data());
     while (m_socket->bytesToWrite() > 0) {
@@ -68,18 +82,28 @@ bool TcpZniConnection::send(const Telegram &request, Telegram &response)
         }
     }
 
-    // TODO: Annahme, dass die Antwort ebenfalls 40 Byte lang ist; mit der Telegrammbeschreibung abgleichen
-    QByteArray buffer;
-    while (buffer.size() < Telegram::Size) {
-        if (m_socket->bytesAvailable() == 0 && !m_socket->waitForReadyRead(m_timeoutMs)) {
-            m_errorString = QStringLiteral("Keine vollständige Antwort innerhalb von %1 ms (%2 von %3 Byte)")
-                                .arg(m_timeoutMs).arg(buffer.size()).arg(Telegram::Size);
-            return false;
-        }
-        buffer.append(m_socket->read(Telegram::Size - buffer.size()));
+    if (!waitFor(request.command(), response, m_timeoutMs)) {
+        m_errorString = QStringLiteral("Keine Antwort innerhalb von %1 ms (%2)").arg(m_timeoutMs).arg(m_errorString);
+        return false;
     }
 
-    response = Telegram(buffer);
+    m_errorString.clear();
+    return true;
+}
+
+bool TcpZniConnection::receive(const quint8 command, Telegram &telegram, const int timeoutMs)
+{
+    if (!isOpen()) {
+        m_errorString = QStringLiteral("Verbindung ist nicht geöffnet");
+        return false;
+    }
+
+    if (!waitFor(command, telegram, timeoutMs)) {
+        m_errorString = QStringLiteral("Kein Telegramm %1 innerhalb von %2 ms (%3)")
+                            .arg(command, 2, 16, QLatin1Char('0')).arg(timeoutMs).arg(m_errorString);
+        return false;
+    }
+
     m_errorString.clear();
     return true;
 }
@@ -87,4 +111,52 @@ bool TcpZniConnection::send(const Telegram &request, Telegram &response)
 QString TcpZniConnection::errorString() const
 {
     return m_errorString;
+}
+
+void TcpZniConnection::readAvailable()
+{
+    m_buffer.append(m_socket->readAll());
+
+    while (m_buffer.size() >= Telegram::Size) {
+        m_pending.append(Telegram(m_buffer.left(Telegram::Size)));
+        m_buffer.remove(0, Telegram::Size);
+    }
+
+    if (m_pending.size() > MaxPendingTelegrams) {
+        m_pending.remove(0, m_pending.size() - MaxPendingTelegrams);
+    }
+}
+
+bool TcpZniConnection::takePending(const quint8 command, Telegram &telegram)
+{
+    for (int i = 0; i < m_pending.size(); ++i) {
+        if (m_pending.at(i).command() == command) {
+            telegram = m_pending.takeAt(i);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool TcpZniConnection::waitFor(const quint8 command, Telegram &telegram, const int timeoutMs)
+{
+    const QDeadlineTimer deadline(timeoutMs);
+
+    while (true) {
+        readAvailable();
+        if (takePending(command, telegram)) {
+            return true;
+        }
+
+        if (deadline.hasExpired()) {
+            m_errorString = QStringLiteral("Zeitüberschreitung");
+            return false;
+        }
+        if (!m_socket->waitForReadyRead(static_cast<int>(deadline.remainingTime()))) {
+            m_errorString = m_socket->state() == QAbstractSocket::ConnectedState
+                                ? QStringLiteral("Zeitüberschreitung")
+                                : QStringLiteral("Verbindung getrennt");
+            return false;
+        }
+    }
 }

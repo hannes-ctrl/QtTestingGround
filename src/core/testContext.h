@@ -31,6 +31,12 @@ public:
     QString testZniHost() const;
     void setTestZniHost(const QString &testZniHost);
 
+    /**
+     * @brief IP-Adresse des Sim-ZNI (derzeit von keinem Telegramm benötigt).
+     */
+    QString simZniHost() const;
+    void setSimZniHost(const QString &simZniHost);
+
     bool abortRequested() const;
     void setAbortRequested(bool abortRequested);
 
@@ -41,6 +47,7 @@ private:
 
     QString m_serialNumber;
     QString m_testZniHost;
+    QString m_simZniHost;
     std::atomic_bool m_abortRequested;
 };
 

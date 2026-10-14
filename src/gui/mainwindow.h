@@ -55,6 +55,11 @@ class MainWindow : public QMainWindow
         bool readHost(const QLineEdit *input, const QString &label, QString &host);
 
         /**
+         * @brief Simulierte Verbindung, die die eingegebene Seriennummer und je Modem einen ZLV-Status meldet.
+         */
+        std::unique_ptr<ZniConnection> createSimulation(const QString &serialNumber) const;
+
+        /**
          * @brief Schreibt das JSON-Protokoll des Durchlaufs und erzeugt daraus das PDF.
          */
         void writeReports();

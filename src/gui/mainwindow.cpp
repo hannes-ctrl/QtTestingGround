@@ -13,6 +13,7 @@
 #include "core/testSession.h"
 #include "hardware/simulatedZniConnection.h"
 #include "hardware/tcpZniConnection.h"
+#include "hardware/telegramBuilder.h"
 #include "report/jsonReportWriter.h"
 #include "report/pdfReportGenerator.h"
 #include "tests/initialTest.h"
@@ -69,17 +70,20 @@ void MainWindow::on_button_clicked()
 
     ui->button->setEnabled(false);
 
-    // Die Verbindung wird für jeden Durchlauf neu angelegt, weil sich die Adresse geändert haben kann
+    m_session = std::make_unique<TestSession>(ui->serialNumberInput->text());
+
+    // Die Verbindung wird für jeden Durchlauf neu angelegt, weil sich die Adresse geändert haben kann.
+    // Laut Testspezifikation gehen alle Telegramme an das zu testende ZNI.
     if (m_config->simulation()) {
-        m_connection = std::make_unique<SimulatedZniConnection>();
+        m_connection = createSimulation(m_session->serialNumber());
     } else {
-        m_connection = std::make_unique<TcpZniConnection>(simZniHost, m_config->port(), m_config->timeoutMs());
+        m_connection = std::make_unique<TcpZniConnection>(testZniHost, m_config->port(), m_config->timeoutMs());
     }
 
-    m_session = std::make_unique<TestSession>(ui->serialNumberInput->text());
     m_context->setConnection(m_connection.get());
     m_context->setSerialNumber(m_session->serialNumber());
     m_context->setTestZniHost(testZniHost);
+    m_context->setSimZniHost(simZniHost);
 
     m_runner->setTests(createSelectedTests());
     m_runner->setContext(m_context.get());
@@ -121,6 +125,33 @@ bool MainWindow::readHost(const QLineEdit *input, const QString &label, QString 
         return false;
     }
     return true;
+}
+
+std::unique_ptr<ZniConnection> MainWindow::createSimulation(const QString &serialNumber) const
+{
+    auto simulation = std::make_unique<SimulatedZniConnection>();
+
+    // Seriennummer so zurückmelden, wie sie eingegeben wurde
+    Telegram serialNumberResponse = TelegramBuilder::status(TelegramBuilder::StatusPageSerialNumber);
+    const QByteArray serialNumberText = serialNumber.trimmed().toLatin1().left(29);
+    for (int i = 0; i < serialNumberText.size(); ++i) {
+        serialNumberResponse.setByte(2 + i, static_cast<quint8>(serialNumberText.at(i)));
+    }
+    simulation->setResponse(static_cast<quint8>(ZniCommand::Status), TelegramBuilder::StatusPageSerialNumber,
+                            serialNumberResponse);
+
+    // Je Modem eine Statusmeldung "regulärer Betrieb" bereitlegen
+    const ZniChannel modems[] = {ZniChannel::Modem1, ZniChannel::Modem2, ZniChannel::Modem3, ZniChannel::Modem4};
+    for (const ZniChannel modem : modems) {
+        Telegram status;
+        status.setByte(0, static_cast<quint8>(ZniCommand::ZlvStatus));
+        status.setByte(1, 0x01);
+        status.setByte(2, static_cast<quint8>(modem));
+        status.setByte(3, 0x01);
+        simulation->queueTelegram(status);
+    }
+
+    return simulation;
 }
 
 std::vector<std::unique_ptr<TestCase>> MainWindow::createSelectedTests() const

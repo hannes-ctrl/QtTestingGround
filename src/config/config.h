@@ -32,6 +32,11 @@ public:
     int timeoutMs() const;
 
     /**
+     * @brief Wartezeit auf unaufgefordert gesendete Telegramme, z. B. die zyklische ZLV-Statusmeldung.
+     */
+    int receiveTimeoutMs() const;
+
+    /**
      * @brief true, wenn statt des Sim-ZNI die simulierte Verbindung verwendet werden soll.
      */
     bool simulation() const;
@@ -43,6 +48,7 @@ private:
     QString m_testZniHost;
     quint16 m_port;
     int m_timeoutMs;
+    int m_receiveTimeoutMs;
     bool m_simulation;
     QString m_reportDirectory;
 };

@@ -16,9 +16,14 @@ public:
 
 private:
     /**
-     * @brief Kanal öffnen, ZLV-Telegramm senden, Kanal schließen für ein Modem.
+     * @brief Konfigurieren, Kanal öffnen, ZLV-Status abwarten, ZLV-Telegramm senden, Kanal schließen.
      */
     void testModem(TestContext &context, ZniChannel modem, TestResult &result) const;
+
+    /**
+     * @brief Wartet auf die zyklische Statusmeldung (Telegramm 62) des Modems und bewertet den Bus-Status.
+     */
+    StepResult receiveZlvStatus(TestContext &context, ZniChannel modem) const;
 };
 
 #endif //ZNI_BG_TESTING_ZLVTEST_H

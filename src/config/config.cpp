@@ -10,6 +10,7 @@ Config::Config()
     , m_testZniHost(QStringLiteral("10.90.78.32"))
     , m_port(2000)
     , m_timeoutMs(3000)
+    , m_receiveTimeoutMs(5000)
     , m_simulation(false)
     , m_reportDirectory(QCoreApplication::applicationDirPath() + QStringLiteral("/protokolle"))
 {
@@ -34,6 +35,7 @@ bool Config::load(const QString &filePath)
     m_testZniHost = root.value(QStringLiteral("testZniHost")).toString(m_testZniHost);
     m_port = static_cast<quint16>(root.value(QStringLiteral("port")).toInt(m_port));
     m_timeoutMs = root.value(QStringLiteral("timeoutMs")).toInt(m_timeoutMs);
+    m_receiveTimeoutMs = root.value(QStringLiteral("receiveTimeoutMs")).toInt(m_receiveTimeoutMs);
     m_simulation = root.value(QStringLiteral("simulation")).toBool(m_simulation);
     m_reportDirectory = root.value(QStringLiteral("reportDirectory")).toString(m_reportDirectory);
     return true;
@@ -57,6 +59,11 @@ quint16 Config::port() const
 int Config::timeoutMs() const
 {
     return m_timeoutMs;
+}
+
+int Config::receiveTimeoutMs() const
+{
+    return m_receiveTimeoutMs;
 }
 
 bool Config::simulation() const

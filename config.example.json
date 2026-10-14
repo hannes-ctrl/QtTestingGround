@@ -3,6 +3,7 @@
     "testZniHost": "10.90.78.32",
     "port": 2000,
     "timeoutMs": 3000,
+    "receiveTimeoutMs": 5000,
     "simulation": false,
     "reportDirectory": "C:/Pruefprotokolle"
 }

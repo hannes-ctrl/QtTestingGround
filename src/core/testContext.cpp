@@ -50,6 +50,16 @@ void TestContext::setTestZniHost(const QString &testZniHost)
     m_testZniHost = testZniHost;
 }
 
+QString TestContext::simZniHost() const
+{
+    return m_simZniHost;
+}
+
+void TestContext::setSimZniHost(const QString &simZniHost)
+{
+    m_simZniHost = simZniHost;
+}
+
 bool TestContext::abortRequested() const
 {
     return m_abortRequested;

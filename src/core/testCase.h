@@ -3,6 +3,8 @@
 
 #include <QString>
 
+#include <functional>
+
 #include "testResult.h"
 
 class Telegram;
@@ -25,23 +27,42 @@ public:
     virtual TestResult run(TestContext &context) = 0;
 
 protected:
+    /**
+     * @brief Zusätzliche Prüfung einer Antwort.
+     * @param response die empfangene Antwort
+     * @param message Meldung fürs Protokoll (Abweichung oder ausgelesene Werte)
+     * @return true, wenn die Antwort den Erwartungen entspricht
+     */
+    using ResponseCheck = std::function<bool(const Telegram &response, QString &message)>;
+
     explicit TestCase(const QString &name);
 
     /**
-     * @brief Sendet ein Telegramm und macht daraus einen Prüfschritt mit gesendetem und empfangenem Telegramm.
+     * @brief Sendet ein Telegramm und bewertet die Antwort als Prüfschritt.
      *
-     * Kommt keine Antwort, hat der Schritt den Status Error. Sonst ist er NotEvaluated,
-     * solange die Auswertung der Antwort nicht festgelegt ist.
+     * - keine Antwort: Error
+     * - Fehlercode (Byte 40) ungleich 00: Failed mit der Beschreibung des Fehlercodes
+     * - sonst entscheidet check (falls angegeben), ohne check: Passed
      *
      * @param response erhält die Antwort, falls angegeben und eine empfangen wurde
      */
     StepResult sendStep(TestContext &context, const QString &stepName, const Telegram &request,
-                        Telegram *response = nullptr) const;
+                        const ResponseCheck &check = nullptr, Telegram *response = nullptr) const;
+
+    /**
+     * @brief Prüfung, dass die Antwort im dritten Byte die angefragte Peripherie zurückmeldet.
+     */
+    static ResponseCheck echoesThirdByte(quint8 expected);
 
     /**
      * @brief Prüfschritt, der laut Testspezifikation (noch) nicht ausgeführt werden kann.
      */
     static StepResult skippedStep(const QString &stepName, const QString &reason);
+
+    /**
+     * @brief Zweistellige Hex-Darstellung eines Bytes, z. B. "7A".
+     */
+    static QString hexByte(quint8 value);
 
 private:
     QString m_name;

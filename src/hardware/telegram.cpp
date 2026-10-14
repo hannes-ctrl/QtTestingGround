@@ -46,6 +46,39 @@ void Telegram::setByte(const int index, const quint8 value)
     m_data[index] = static_cast<char>(value);
 }
 
+QByteArray Telegram::bytes(const int index, const int count) const
+{
+    return m_data.mid(index, count);
+}
+
+QString Telegram::ascii(const int index, const int count) const
+{
+    QByteArray text = bytes(index, count);
+    while (!text.isEmpty() && (text.endsWith('\0') || text.endsWith(' '))) {
+        text.chop(1);
+    }
+    return QString::fromLatin1(text);
+}
+
+quint32 Telegram::number(const int index, const int count) const
+{
+    quint32 value = 0;
+    for (int i = 0; i < count && i < 4; ++i) {
+        value = (value << 8) | byteAt(index + i);
+    }
+    return value;
+}
+
+quint8 Telegram::errorCode() const
+{
+    return byteAt(Size - 1);
+}
+
+QByteArray Telegram::timestamp() const
+{
+    return bytes(31, 8);
+}
+
 QByteArray Telegram::data() const
 {
     return m_data;

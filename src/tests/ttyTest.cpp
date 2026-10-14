@@ -22,23 +22,28 @@ TestResult TtyTest::run(TestContext &context)
     }
 
     result.addStep(skippedStep(QStringLiteral("Telegramm empfangen"),
-                               QStringLiteral("In der Testspezifikation offen (4.5)")));
+                               QStringLiteral("Gegenstelle, die ein TTY-Telegramm sendet, ist nicht festgelegt (4.5)")));
     return result;
 }
 
 void TtyTest::testTty(TestContext &context, const ZniChannel tty, TestResult &result) const
 {
     const QString channel = zniChannelName(tty);
+    const quint8 channelByte = static_cast<quint8>(tty);
 
-    // TODO: Nutzdaten festlegen (Testspezifikation 4.4), bis dahin ein fester Prüftext
-    const QByteArray payload = QByteArrayLiteral("ZNI-BG TTY-Test");
-
-    result.addStep(sendStep(context, QStringLiteral("%1: konfigurieren").arg(channel),
-                            TelegramBuilder::configure(tty)));
+    // TODO: Testspezifikation 4.1 lässt offen, ob TTY transparent oder als ZLV-Bus-Teilnehmer läuft;
+    //       bis dahin transparent mit den Standardwerten aus TransparentConfig
+    result.addStep(sendStep(context, QStringLiteral("%1: konfigurieren (transparent)").arg(channel),
+                            TelegramBuilder::configureTransparent(tty, TransparentConfig()),
+                            echoesThirdByte(channelByte)));
     result.addStep(sendStep(context, QStringLiteral("%1: Kanal öffnen").arg(channel),
-                            TelegramBuilder::openChannel(tty)));
+                            TelegramBuilder::openChannel(tty), echoesThirdByte(channelByte)));
+
+    // TODO: Nutzdaten festlegen, bis dahin ein fester Prüftext
+    const QByteArray payload = QByteArrayLiteral("ZNI-BG TTY-Test");
     result.addStep(sendStep(context, QStringLiteral("%1: Telegramm senden").arg(channel),
-                            TelegramBuilder::sendTty(tty, payload)));
+                            TelegramBuilder::sendTty(tty, payload), echoesThirdByte(channelByte)));
+
     result.addStep(sendStep(context, QStringLiteral("%1: Kanal schließen").arg(channel),
-                            TelegramBuilder::closeChannel(tty)));
+                            TelegramBuilder::closeChannel(tty), echoesThirdByte(channelByte)));
 }
